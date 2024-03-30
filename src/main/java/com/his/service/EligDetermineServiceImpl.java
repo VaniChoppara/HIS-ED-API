@@ -1,6 +1,7 @@
 package com.his.service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,14 +58,23 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 	}
 
 	private boolean checkAge(List<KidDTO> kids) {
-		// need to implement the logic to check kids age <16
-
+		for(KidDTO kidDto:kids) {
+			LocalDate curDate= LocalDate.now();
+			int years = Period.between(kidDto.getDob(), curDate).getYears();
+			if(years>16) {
+				return false;
+			}
+		}		
 		return true;
 	}
 
 	private boolean checkAge(LocalDate dob) {
-		// need to implement the logic to check citizen age age >65
-		return true;
+		LocalDate curDate= LocalDate.now();
+		int years = Period.between(dob, curDate).getYears();
+		if(years>=65)
+			return true;
+		else 
+			return false;
 	}
 
 }
