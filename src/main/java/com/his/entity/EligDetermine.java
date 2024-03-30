@@ -21,7 +21,7 @@ public class EligDetermine{
 	private LocalDate eligEndDate;
 	private Integer benefitAmount;
 	private String denialReason;
-	private LocalDateTime eligiDeterDate;
+	private LocalDate eligiDeterDate;
 	private Integer appNumber;
 	public Integer getEligId() {
 		return eligId;
@@ -59,11 +59,11 @@ public class EligDetermine{
 	public void setDenialReason(String denialReason) {
 		this.denialReason = denialReason;
 	}
-	public LocalDateTime getEligiDeterDate() {
+	public LocalDate getEligiDeterDate() {
 		return eligiDeterDate;
 	}
-	public void setEligiDeterDate(LocalDateTime eligiDeterDate) {
-		this.eligiDeterDate = eligiDeterDate;
+	public void setEligiDeterDate(LocalDate localDate) {
+		this.eligiDeterDate = localDate;
 	}
 	public Integer getAppNumber() {
 		return appNumber;
