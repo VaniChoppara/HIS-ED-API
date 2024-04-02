@@ -61,11 +61,11 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 		for(KidDTO kidDto:kids) {
 			LocalDate curDate= LocalDate.now();
 			int years = Period.between(kidDto.getDob(), curDate).getYears();
-			if(years>16) {
-				return false;
+			if(years<=16) {
+				return true;
 			}
 		}		
-		return true;
+		return false;
 	}
 
 	private boolean checkAge(LocalDate dob) {
@@ -75,6 +75,17 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 			return true;
 		else 
 			return false;
+	}
+
+	@Override
+	public List<EligDetermine> getAl1EdDetalil() {
+		return edRepository.findAll();
+	}
+
+	@Override
+	public EligDetermine getEdDetalilByAppNumber(Integer appNumber) {
+		
+		return edRepository.findByAppNumber(appNumber);
 	}
 
 }
