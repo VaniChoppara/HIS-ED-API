@@ -12,6 +12,7 @@ import com.his.dto.KidDTO;
 import com.his.dto.PlanDTO;
 import com.his.dto.SummaryDTO;
 import com.his.entity.EligDetermine;
+import com.his.exception.EdException;
 import com.his.repository.EligDetermineRepository;
 
 @Service
@@ -23,6 +24,10 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 	@Override
 	public boolean determineEligibility(SummaryDTO summary, ApplicationRegDTO application, PlanDTO plan) {
 		EligDetermine edEntity = new EligDetermine();
+		EligDetermine edByAppNumber = edRepository.findByAppNumber(application.getAppNumber());
+		if(edByAppNumber!=null)
+			throw new EdException("Application proceessed already. Please proceed to view the status");
+			
 		edEntity.setAppNumber(application.getAppNumber());
 		boolean status = false;
 
