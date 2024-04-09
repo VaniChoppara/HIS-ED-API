@@ -2,6 +2,7 @@ package com.his.service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -14,7 +15,6 @@ import com.his.dto.KidDTO;
 import com.his.dto.PlanDTO;
 import com.his.dto.SummaryDTO;
 import com.his.entity.EligDetermine;
-import com.his.exception.EdException;
 import com.his.repository.EligDetermineRepository;
 
 @Service
@@ -138,14 +138,25 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 	}
 
 	@Override
-	public List<EligDetermine> getAl1EdDetalil() {
-		return edRepository.findAll();
+	public List<EligDetermineDTO> getAl1EdDetalil() {
+		List<EligDetermineDTO> edDtoList= new ArrayList<EligDetermineDTO>();
+		 edRepository.findAll().forEach((edEntity)->{
+			 EligDetermineDTO edDto= new EligDetermineDTO();
+				BeanUtils.copyProperties(edEntity, edDto);
+				edDtoList.add(edDto);
+		 });
+		 
+		 return edDtoList;
 	}
 
 	@Override
-	public EligDetermine getEdDetalilByAppNumber(Integer appNumber) {
+	public EligDetermineDTO getEdDetalilByAppNumber(Integer appNumber) {
 
-		return edRepository.findByAppNumber(appNumber);
+		EligDetermine edEntity = edRepository.findByAppNumber(appNumber);
+		EligDetermineDTO edDto= new EligDetermineDTO();
+		BeanUtils.copyProperties(edEntity, edDto);
+		return edDto;
+		
 	}
 
 }

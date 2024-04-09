@@ -61,15 +61,15 @@ public class EligDetermineController {
 	}
 
 	@GetMapping("/eddetails")
-	public ResponseEntity<List<EligDetermine>> getAllEdDetalil() {
-		List<EligDetermine> edDetails = edService.getAl1EdDetalil();
+	public ResponseEntity<List<EligDetermineDTO>> getAllEdDetalil() {
+		List<EligDetermineDTO> edDetails = edService.getAl1EdDetalil();
 
 		return new ResponseEntity<>(edDetails, HttpStatus.OK);
 	}
 
 	@GetMapping("/eddetails/{appNumber}")
-	public ResponseEntity<EligDetermine> getEdDetalilByAppNumber(@PathVariable("appNumber") Integer appNumber) {
-		EligDetermine edDetail = edService.getEdDetalilByAppNumber(appNumber);
+	public ResponseEntity<EligDetermineDTO> getEdDetalilByAppNumber(@PathVariable("appNumber") Integer appNumber) {
+		EligDetermineDTO edDetail = edService.getEdDetalilByAppNumber(appNumber);
 
 		return new ResponseEntity<>(edDetail, HttpStatus.OK);
 	}

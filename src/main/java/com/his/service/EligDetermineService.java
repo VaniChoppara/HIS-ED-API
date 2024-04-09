@@ -12,8 +12,8 @@ public interface EligDetermineService {
 
 	EligDetermineDTO determineEligibility(SummaryDTO summary, ApplicationRegDTO application, PlanDTO plan);
 
-	List<EligDetermine> getAl1EdDetalil();
+	List<EligDetermineDTO> getAl1EdDetalil();
 
-	EligDetermine getEdDetalilByAppNumber(Integer appNumber);
+	EligDetermineDTO getEdDetalilByAppNumber(Integer appNumber);
 
 }
