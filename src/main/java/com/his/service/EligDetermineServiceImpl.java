@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.his.dto.ApplicationRegDTO;
+import com.his.dto.EligDetermineDTO;
 import com.his.dto.KidDTO;
 import com.his.dto.PlanDTO;
 import com.his.dto.SummaryDTO;
@@ -22,63 +24,116 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 	EligDetermineRepository edRepository;
 
 	@Override
-	public boolean determineEligibility(SummaryDTO summary, ApplicationRegDTO application, PlanDTO plan) {
+	public EligDetermineDTO determineEligibility(SummaryDTO summary, ApplicationRegDTO application, PlanDTO plan) {
 		EligDetermine edEntity = new EligDetermine();
+		EligDetermineDTO eligDto = new EligDetermineDTO();
 		EligDetermine edByAppNumber = edRepository.findByAppNumber(application.getAppNumber());
-		if(edByAppNumber!=null)
-			throw new EdException("Application proceessed already. Please proceed to view the status");
-			
+		if (edByAppNumber != null) {
+			// throw new EdException("Application proceessed already. Please proceed to view
+			// the status");
+			BeanUtils.copyProperties(edByAppNumber, eligDto);
+			return eligDto;
+		}
 		edEntity.setAppNumber(application.getAppNumber());
-		boolean status = false;
+		edEntity.setPlanName(plan.getName());
+		edEntity.setEligiDeterDate(LocalDate.now());
 
-		if (plan.getName().equalsIgnoreCase("SNAP") && summary.getIncomeDto().getSalIncome() <= 300) {
-			status = true;
-		} else if (plan.getName().equalsIgnoreCase("CCAP") && summary.getIncomeDto().getSalIncome() <= 300
-				&& summary.getKidsDto().getKids().size() > 0 && checkAge(summary.getKidsDto().getKids())) {
-			status = true;
-		} else if (plan.getName().equalsIgnoreCase("Medicaid") && summary.getIncomeDto().getSalIncome() <= 300
-				&& summary.getIncomeDto().getPropIncome() == 0) {
-			status = true;
-		} else if (plan.getName().equalsIgnoreCase("Medicare") && summary.getIncomeDto().getSalIncome() <= 300
-				&& checkAge(application.getDob())) {
-			status = true;
-		} else if (plan.getName().equalsIgnoreCase("RIW") && summary.getIncomeDto().getSalIncome() <= 300
-				&& summary.getEduDto().getHighestDegree().equals("Graduation")) {
-			status = true;
+		if (plan.getName().equalsIgnoreCase("SNAP")) {
+			if (summary.getIncomeDto().getSalIncome() <= 300) {
+				edEntity.setEligStatus("Approved");
+				edEntity.setBenefitAmount(300);
+				edEntity.setEligStartdate(LocalDate.now());
+				edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
+			} else {
+				edEntity.setDenialReason("High Income");
+				edEntity.setEligStatus("Approved");
+			}
+		}else if (plan.getName().equalsIgnoreCase("CCAP")) {
+			if (summary.getIncomeDto().getSalIncome() <= 300) {
+				if (summary.getKidsDto().getKids().size() > 0) {
+					if (checkAge(summary.getKidsDto().getKids())) {
+						edEntity.setEligStatus("Approved");
+						edEntity.setBenefitAmount(300);
+						edEntity.setEligStartdate(LocalDate.now());
+						edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
+					} else {
+						edEntity.setDenialReason("Kid age is above 16");
+						edEntity.setEligStatus("Denied");
+					}
+				} else {
+					edEntity.setDenialReason("No Kids available");
+					edEntity.setEligStatus("Denied");
+				}
+			} else {
+				edEntity.setDenialReason("High Income");
+				edEntity.setEligStatus("Denied");
+			}
+		}else if (plan.getName().equalsIgnoreCase("Medicaid")) {
+			if (summary.getIncomeDto().getSalIncome() <= 300 && summary.getIncomeDto().getPropIncome() == 0) {
+				edEntity.setEligStatus("Approved");
+				edEntity.setBenefitAmount(300);
+				edEntity.setEligStartdate(LocalDate.now());
+				edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
+			} else {
+				edEntity.setDenialReason("High Income");
+				edEntity.setEligStatus("Denied");
+			}
+		}else if (plan.getName().equalsIgnoreCase("Medicare")) {
+			if (summary.getIncomeDto().getSalIncome() <= 300) {
+				if (checkAge(application.getDob())) {
+					edEntity.setEligStatus("Approved");
+					edEntity.setBenefitAmount(300);
+					edEntity.setEligStartdate(LocalDate.now());
+					edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
+				} else {
+					edEntity.setDenialReason("Age not matched");
+					edEntity.setEligStatus("Denied");
+				}
+			} else {
+				edEntity.setDenialReason("High Income");
+				edEntity.setEligStatus("Denied");
+			}
+		}else if (plan.getName().equalsIgnoreCase("RIW")) {
+			if (summary.getIncomeDto().getSalIncome() == 0) {
+				if (summary.getEduDto().getHighestDegree() != null) {
+					edEntity.setEligStatus("Approved");
+					edEntity.setBenefitAmount(300);
+					edEntity.setEligStartdate(LocalDate.now());
+					edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
+				} else {
+					edEntity.setDenialReason("No Graduation");
+					edEntity.setEligStatus("Denied");
+				}
+			}else {
+				edEntity.setDenialReason("Have Income");
+				edEntity.setEligStatus("Denied");
+			}
 		}
+		EligDetermine eligDetermine = edRepository.save(edEntity);
 
-		if (status) {
-			edEntity.setEligStatus("Approved");
-			edEntity.setBenefitAmount(300);
-			edEntity.setEligiDeterDate(LocalDate.now());
-			edEntity.setEligStartdate(LocalDate.now());
-			edEntity.setEligEndDate(LocalDate.now().plusMonths(6));
-		} else {
-			edEntity.setEligStatus("Denied");
-			edEntity.setDenialReason("Did not meet the Eligibility Criteria");
-			edEntity.setEligiDeterDate(LocalDate.now());
-		}
-		edRepository.save(edEntity);
-		return status;
+		BeanUtils.copyProperties(eligDetermine, eligDto);
+		return eligDto;
 	}
 
+	
+
 	private boolean checkAge(List<KidDTO> kids) {
-		for(KidDTO kidDto:kids) {
-			LocalDate curDate= LocalDate.now();
+		for (KidDTO kidDto : kids) {
+			LocalDate curDate = LocalDate.now();
 			int years = Period.between(kidDto.getDob(), curDate).getYears();
-			if(years<=16) {
+			if (years <= 16) {
 				return true;
 			}
-		}		
+		}
 		return false;
 	}
 
 	private boolean checkAge(LocalDate dob) {
-		LocalDate curDate= LocalDate.now();
+		LocalDate curDate = LocalDate.now();
 		int years = Period.between(dob, curDate).getYears();
-		if(years>=65)
+		if (years >= 65)
 			return true;
-		else 
+		else
 			return false;
 	}
 
@@ -89,7 +144,7 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 
 	@Override
 	public EligDetermine getEdDetalilByAppNumber(Integer appNumber) {
-		
+
 		return edRepository.findByAppNumber(appNumber);
 	}
 

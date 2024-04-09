@@ -1,7 +1,6 @@
 package com.his.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +15,7 @@ public class EligDetermine{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer eligId;
+	private String planName;
 	private String eligStatus;
 	private LocalDate eligStartdate;
 	private LocalDate eligEndDate;
@@ -71,5 +71,12 @@ public class EligDetermine{
 	public void setAppNumber(Integer appNumber) {
 		this.appNumber = appNumber;
 	}
+	public String getPlanName() {
+		return planName;
+	}
+	public void setPlanName(String planName) {
+		this.planName = planName;
+	}
+	
 
 }
