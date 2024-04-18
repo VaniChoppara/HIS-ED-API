@@ -9,7 +9,7 @@ public class ApplicationRegDTO {
 	private LocalDate dob;
 	private String gender;
 	private Integer planId	;
-	private Integer  citizenId;
+	private Long  citizenId;
 	
 
 	public Integer getAppNumber() {
@@ -48,10 +48,10 @@ public class ApplicationRegDTO {
 	public void setPlanId(Integer planId) {
 		this.planId = planId;
 	}
-	public Integer getCitizenId() {
+	public Long getCitizenId() {
 		return citizenId;
 	}
-	public void setCitizenId(Integer citizenId) {
+	public void setCitizenId(Long citizenId) {
 		this.citizenId = citizenId;
 	}
 	

@@ -3,6 +3,7 @@ package com.his.dto;
 import java.time.LocalDate;
 
 public class EligDetermineDTO {
+	private Integer eligId;
 	private String planName;
 	private String eligStatus;
 	private LocalDate eligStartdate;
@@ -11,6 +12,14 @@ public class EligDetermineDTO {
 	private String denialReason;
 	private LocalDate eligiDeterDate;
 	private Integer appNumber;
+	
+	
+	public Integer getEligId() {
+		return eligId;
+	}
+	public void setEligId(Integer eligId) {
+		this.eligId = eligId;
+	}
 	public String getPlanName() {
 		return planName;
 	}

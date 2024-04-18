@@ -7,9 +7,12 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import com.his.client.CoNoticeApiClient;
 import com.his.dto.ApplicationRegDTO;
+import com.his.dto.CoNoticeDTO;
 import com.his.dto.EligDetermineDTO;
 import com.his.dto.KidDTO;
 import com.his.dto.PlanDTO;
@@ -22,6 +25,10 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 
 	@Autowired
 	EligDetermineRepository edRepository;
+	
+	@Autowired
+	CoNoticeApiClient coClient;
+
 
 	@Override
 	public EligDetermineDTO determineEligibility(SummaryDTO summary, ApplicationRegDTO application, PlanDTO plan) {
@@ -110,12 +117,19 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 			}
 		}
 		EligDetermine eligDetermine = edRepository.save(edEntity);
+		
+		// Make an entry into correspondence to print
+		CoNoticeDTO coDto = new CoNoticeDTO();
+		coDto.setAppNumber(application.getAppNumber());
+		coDto.setCoNoticeStatus("Pending");
+		coClient.generateCorrespondence(coDto);   		
+
 
 		BeanUtils.copyProperties(eligDetermine, eligDto);
 		return eligDto;
-	}
+	}	
 
-	
+
 
 	private boolean checkAge(List<KidDTO> kids) {
 		for (KidDTO kidDto : kids) {
@@ -125,8 +139,10 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 				return true;
 			}
 		}
+		// TODO Auto-generated method stub
 		return false;
 	}
+
 
 	private boolean checkAge(LocalDate dob) {
 		LocalDate curDate = LocalDate.now();
@@ -157,6 +173,43 @@ public class EligDetermineServiceImpl implements EligDetermineService {
 		BeanUtils.copyProperties(edEntity, edDto);
 		return edDto;
 		
+	}
+
+
+
+	@Override
+	public List<String> getPlanNames() {
+		// TODO Auto-generated method stub
+		return edRepository.getPlanNames();
+	}
+
+
+
+	@Override
+	public List<String> getStatuses() {
+		// TODO Auto-generated method stub
+		return edRepository.getPlanStatuses();
+	}
+
+
+
+	@Override
+	public List<EligDetermineDTO> searchEdDetails(EligDetermineDTO searchDto) {
+		// TODO Auto-generated method stub
+		
+		EligDetermine searchEntity=new EligDetermine();
+		BeanUtils.copyProperties(searchDto, searchEntity);
+		Example<EligDetermine> of=Example.of(searchEntity);		
+		List<EligDetermineDTO> edDtoList= new ArrayList<EligDetermineDTO>();
+		 edRepository.findAll(of).forEach((entity)->{
+			 EligDetermineDTO dto= new EligDetermineDTO();
+				BeanUtils.copyProperties(entity, dto);
+				edDtoList.add(dto);
+		 });
+		 
+		 return edDtoList;
+
+	
 	}
 
 }
